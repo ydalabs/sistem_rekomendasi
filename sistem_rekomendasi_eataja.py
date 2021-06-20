@@ -20,7 +20,7 @@ def show(aidi_resto, dipesans):
     # Builing Request URL
     #id = "0d93f781-7f1a-4c42-a056-683fd8866793"
     url = "https://api.eataja.com/api/get-order-mitra/" + aidi_resto
-    print(url)
+    # print(url)
 
     # Send Request Method to EatAja server
     req = requests.get(url).json()
@@ -30,11 +30,11 @@ def show(aidi_resto, dipesans):
     for i in req['data']:
         dta_.append(i)
     df_ = pd.DataFrame(dta_)
-    print(df_.head(53))
+    # print(df_.head(53))
 
     # Experiment
-    print(df_[['waktu_order', 'total_price']])
-    print(df_[['nama_pemesan', 'menu_order']])
+    #print(df_[['waktu_order', 'total_price']])
+    #print(df_[['nama_pemesan', 'menu_order']])
 
     # Data Preprocessing Step1
     namaColumn = 'menu'
@@ -54,10 +54,10 @@ def show(aidi_resto, dipesans):
         for k in df_order.columns:
             if df_order[k][i] != None:
                 a = df_order[k][i]['menu_id']
-                #print(a, k, i)
+                ##print(a, k, i)
             # else :
             #     a = 'None'
-            #     print(a)
+            #     #print(a)
                 ll.append(a)
         dff = pd.DataFrame(ll)
         dff = dff.transpose()
@@ -86,28 +86,28 @@ def show(aidi_resto, dipesans):
         cleanedList = [x for x in kk if str(x) != 'nan']
         readyTuseV2.append(cleanedList)
         dff3 = pd.concat([dff3, dff], ignore_index=True)
-    print(dff3)
-    print(readyTuseV2)
+    # print(dff3)
+    # print(readyTuseV2)
 
     # DataPreprocessing Step2
     te = TransactionEncoder()
     te_ary = te.fit(readyTuseV2).transform(readyTuseV2)
 
     df = pd.DataFrame(te_ary, columns=te.columns_)
-    print(df)
+    # print(df)
 
     # Creat Models for Recommendation System Using Apriori Algorithm
     frequent_itemsets = apriori(df, min_support=0.2, use_colnames=True)
-    print(frequent_itemsets)
+    # print(frequent_itemsets)
 
     res = association_rules(
         frequent_itemsets, metric="confidence", min_threshold=0.7)
 
     res1 = res[['antecedents', 'consequents', 'support', 'confidence', 'lift']]
-    print(res1)
+    # print(res1)
 
     res2 = res1[res1['confidence'] >= 1]
-    print(res2)
+    # print(res2)
 
     # Testing and Get Specific Item Recommendation
     #
@@ -115,25 +115,25 @@ def show(aidi_resto, dipesans):
     # Input
     buyed_item = 'ast', 'tes2'
     order_set = frozenset({dipesans})
-    print(order_set)
+    # print(order_set)
 
     # Search
     res3 = res2[res2["antecedents"] == order_set]
 
     # Create If Here, When Recomendation is not ready
-    print(res3)
+    # print(res3)
 
     recomend_item = res3["consequents"]
-    print(recomend_item)
+    # print(recomend_item)
     # Results
     result = res3.to_json(orient="records")
 
     # Results in JSON response version
     parsed = json.loads(result)
-    print("this parsed", parsed)
+    #print("this parsed", parsed)
 
     response = json.dumps(parsed, indent=0)
-    print("Respon JSON", json.dumps(parsed, indent=0))
+    #print("Respon JSON", json.dumps(parsed, indent=0))
 
     #dataframeResult = pd.DataFrame(res3)
     readyResposne = res3.reset_index(drop=True)
