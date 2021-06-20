@@ -120,62 +120,64 @@ def show(aidi_resto, dipesans):
 
     # Search
     res3 = res2[res2["antecedents"] == order_set]
+    if not res3.empty:
+        # Create If Here, When Recomendation is not ready
+        # print(res3)
 
-    # Create If Here, When Recomendation is not ready
-    # print(res3)
+        recomend_item = res3["consequents"]
+        # print(recomend_item)
+        # Results
+        result = res3.to_json(orient="records")
 
-    recomend_item = res3["consequents"]
-    # print(recomend_item)
-    # Results
-    result = res3.to_json(orient="records")
+        # Results in JSON response version
+        parsed = json.loads(result)
+        #print("this parsed", parsed)
 
-    # Results in JSON response version
-    parsed = json.loads(result)
-    #print("this parsed", parsed)
+        response = json.dumps(parsed, indent=0)
+        #print("Respon JSON", json.dumps(parsed, indent=0))
 
-    response = json.dumps(parsed, indent=0)
-    #print("Respon JSON", json.dumps(parsed, indent=0))
+        #dataframeResult = pd.DataFrame(res3)
+        readyResposne = res3.reset_index(drop=True)
 
-    #dataframeResult = pd.DataFrame(res3)
-    readyResposne = res3.reset_index(drop=True)
+        # STEP1
+        dta_recom = []
+        for i in parsed:
+            dta_recom.append(i)
 
-    # STEP1
-    dta_recom = []
-    for i in parsed:
-        dta_recom.append(i)
+        df_recom = pd.DataFrame(dta_recom)
+        # df_recom.head(53)
 
-    df_recom = pd.DataFrame(dta_recom)
-    # df_recom.head(53)
+        # SPET2
+        idMenu_recom = df_recom["consequents"]
+        # idMenu_recom
 
-    # SPET2
-    idMenu_recom = df_recom["consequents"]
-    # idMenu_recom
+        df_idMenu_recom = pd.DataFrame(idMenu_recom)
+        # df_idMenu_recom.head(53)
 
-    df_idMenu_recom = pd.DataFrame(idMenu_recom)
-    # df_idMenu_recom.head(53)
+        # STEP3
+        dfaja = pd.DataFrame()
 
-    # STEP3
-    dfaja = pd.DataFrame()
+        for index, rows in df_idMenu_recom.iterrows():
+            rows = rows["consequents"]
+            for i in rows:
+                urlDetailMenuRecomended = "http://api.eataja.com/api/mitra/menu/" + i
+                df_recomend = pd.read_json(urlDetailMenuRecomended)
 
-    for index, rows in df_idMenu_recom.iterrows():
-        rows = rows["consequents"]
-        for i in rows:
-            urlDetailMenuRecomended = "http://api.eataja.com/api/mitra/menu/" + i
-            df_recomend = pd.read_json(urlDetailMenuRecomended)
+                df_recomend = df_recomend.transpose()
+                dfaja = dfaja.append(df_recomend, ignore_index=True)
+        # dfaja.head(25)
 
-            df_recomend = df_recomend.transpose()
-            dfaja = dfaja.append(df_recomend, ignore_index=True)
-    # dfaja.head(25)
+        # STEP4
+        dfaja = dfaja.drop_duplicates(subset=['id'])
+        # dfaja.head(25)
 
-    # STEP4
-    dfaja = dfaja.drop_duplicates(subset=['id'])
-    # dfaja.head(25)
+        # STEP5
+        result_menuRecomended = dfaja.to_json(orient="records")
+        parsedDetailRecomendedItem = json.loads(result_menuRecomended)
 
-    # STEP5
-    result_menuRecomended = dfaja.to_json(orient="records")
-    parsedDetailRecomendedItem = json.loads(result_menuRecomended)
+        # parsedDetailRecomendedItem
 
-    # parsedDetailRecomendedItem
-
-    # FINISH
-    return parsedDetailRecomendedItem
+        # FINISH
+        return parsedDetailRecomendedItem
+    else:
+        return {"message": "Belum Ada Rekomendasi"}
