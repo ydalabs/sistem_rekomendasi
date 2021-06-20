@@ -1,0 +1,1 @@
+web: uvicorn sistem_rekomendasi_eataja:app
