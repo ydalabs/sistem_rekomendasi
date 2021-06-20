@@ -114,7 +114,8 @@ def show(aidi_resto, dipesans):
     #
     # Input
     buyed_item = 'ast', 'tes2'
-    order_set = frozenset({dipesans})
+    ordernya = dipesans.split("||")
+    order_set = frozenset(ordernya)
     # print(order_set)
 
     # Search
