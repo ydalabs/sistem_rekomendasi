@@ -63,15 +63,15 @@ def show(aidi_resto, dipesans):
         readyTuse.append(ll)
         dff2 = pd.concat([dff2, dff], ignore_index=True)
 
-    dff2['nama_pemesan'] = df_['nama_pemesan']
+    dff2['order_id'] = df_['order_id']
 
     dff3 = pd.DataFrame()
     final = []
     readyTuseV2 = []
-    for i in dff2['nama_pemesan'].unique():
+    for i in dff2['order_id'].unique():
         kk = []
-        a = dff2[dff2['nama_pemesan'] == i]
-        a.drop(['nama_pemesan'], axis=1, inplace=True)
+        a = dff2[dff2['order_id'] == i]
+        a.drop(['order_id'], axis=1, inplace=True)
         for j in a.columns:
             for k in a[j]:
                 if k not in kk:
@@ -80,7 +80,7 @@ def show(aidi_resto, dipesans):
         final.append(k)
         dff = pd.DataFrame([kk])
         dff.dropna(axis=1, inplace=True)
-        dff.insert(0, 'nama', i)
+        dff.insert(0, 'order_id', i)
         # kk.append(i)
         cleanedList = [x for x in kk if str(x) != 'nan']
         readyTuseV2.append(cleanedList)
