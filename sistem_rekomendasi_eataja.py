@@ -1,5 +1,4 @@
 from fastapi import FastAPI
-
 from mlxtend.frequent_patterns import association_rules
 from mlxtend.frequent_patterns import apriori
 from mlxtend.preprocessing import TransactionEncoder
@@ -100,6 +99,13 @@ def show(aidi_resto, dipesans):
     frequent_itemsets = apriori(df, min_support=0.2, use_colnames=True)
     # print(frequent_itemsets)
 
+    # POPULAR MENU
+    popular_menu = pd.DataFrame()
+    popmenu = pd.DataFrame()
+    popular_menu = frequent_itemsets.nlargest(3, 'support')
+    popmenu = popmenu.append(popular_menu, ignore_index=True)
+    # popmenu
+
     res = association_rules(
         frequent_itemsets, metric="confidence", min_threshold=0.7)
 
@@ -179,5 +185,45 @@ def show(aidi_resto, dipesans):
 
         # FINISH
         return parsedDetailRecomendedItem
+
+    elif not popmenu.empty:
+        result = popmenu.to_json(orient="records")
+        parsed = json.loads(result)
+
+        dta_recom = []
+        for i in parsed:
+            dta_recom.append(i)
+
+        df_recom = pd.DataFrame(dta_recom)
+
+        idMenu_recom = df_recom["itemsets"]
+
+        df_idMenu_recom = pd.DataFrame(idMenu_recom)
+
+        dfaja = pd.DataFrame()
+        counter = 0
+        for index, rows in df_idMenu_recom.iterrows():
+            rows = rows["itemsets"]
+            for i in rows:
+                # time.sleep(1)
+                urlDetailMenuRecomended = "http://api.eataja.com/api/mitra/menu/" + i
+                df_recomend = pd.read_json(urlDetailMenuRecomended)
+
+                df_recomend = df_recomend.transpose()
+                dfaja = dfaja.append(df_recomend, ignore_index=True)
+    #         if counter == 50:
+    #             break
+    #         print(counter)
+    #         counter +=1
+
+        # STEP4
+        dfaja = dfaja.drop_duplicates(subset=['id'])
+
+        # STEP5
+        result_menuRecomended = dfaja.to_json(orient="records")
+        parsedDetailRecomendedItem = json.loads(result_menuRecomended)
+
+        return parsedDetailRecomendedItem
+
     else:
         return {"message": "Belum Ada Rekomendasi"}
